@@ -3,13 +3,22 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>com.lzy.example</groupId>
     <artifactId>lzy-learning-example</artifactId>
-    <version>${revision}</version>
+    <version>Final</version>
     <packaging>pom</packaging>
+
     <modules>
-        <module>dependencies</module>
+        <module>hello-world</module>
     </modules>
+
+    <!-- 继承：Spring Boot Parent -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.4.8</version>
+    </parent>
 
     <name>${project.artifactId}</name>
     <description>学习项目基础脚手架</description>
@@ -23,23 +32,48 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-        <!-- 看看咋放到 bom 里 -->
-        <lombok.version>1.18.28</lombok.version>
-        <spring.boot.version>2.7.14</spring.boot.version>
-        <mapstruct.version>1.5.5.Final</mapstruct.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- 工具类相关 -->
+        <lombok.version>1.18.28</lombok.version>
+        <!-- hutool -->
+        <hutool.util.version>5.8.20</hutool.util.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
     </properties>
+
+    <!-- 所有项目 项目依赖声明 -->
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+            <scope>provided</scope> <!-- 编译阶段生效，不需要打入包中 -->
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/cn.hutool/hutool-all -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>${hutool.util.version}</version>
+        </dependency>
+    </dependencies>
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>com.lzy.example</groupId>
-                <artifactId>dependencies</artifactId>
-                <version>${revision}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
+
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.google.cloud.tools</groupId>
+                    <artifactId>jib-maven-plugin</artifactId>
+                    <version>3.2.1</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 </project>

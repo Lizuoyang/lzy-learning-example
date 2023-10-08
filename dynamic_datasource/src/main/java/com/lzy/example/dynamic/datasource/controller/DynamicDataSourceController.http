@@ -1,0 +1,14 @@
+GET http://localhost:8080/ds/getData/add_slave
+Accept: application/json
+
+###
+GET http://localhost:8080/ds/getData/slave
+Accept: application/json
+
+###
+GET http://localhost:8080/ds/getMasterData
+Accept: application/json
+
+###
+GET http://localhost:8080/ds/getSlaveData
+Accept: application/json

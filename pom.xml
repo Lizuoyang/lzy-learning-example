@@ -13,6 +13,7 @@
         <module>hello-world</module>
         <module>dynamic_datasource</module>
         <module>mybatis-plus-general</module>
+        <module>design-patterns</module>
     </modules>
 
     <!-- 继承：Spring Boot Parent -->

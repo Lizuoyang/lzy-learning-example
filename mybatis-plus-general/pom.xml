@@ -7,7 +7,7 @@
         <groupId>com.lzy.example</groupId>
         <version>Final</version>
     </parent>
-    <groupId>com.lizuoyang.springboot</groupId>
+    <groupId>com.lzy.example</groupId>
     <artifactId>mybatis-plus-general</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>mybatis-plus-general</name>

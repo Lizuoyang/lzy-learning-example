@@ -1,6 +1,5 @@
 package com.lzy.example.design.patterns;
 
-import com.lzy.example.design.patterns.stragegy.StatisticBaseHandler;
 import com.lzy.example.design.patterns.stragegy.selector.StatisticStrategySelector;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +11,8 @@ public class StragegyTest {
     private StatisticStrategySelector selector;
     @Test
     public void test() {
+        selector.doInvoke("week");
+        selector.doInvoke("month");
         selector.doInvoke("year");
     }
 }

@@ -21,7 +21,7 @@ public class IpLocationQueryApplication {
     public static void main(String[] args) throws InterruptedException {
         System.out.println("IpLocationQueryApplication Start ");
 
-        String fileName = "D:\\后台管理系统IP归属地3.xls";
+        String fileName = "D:\\ums_admin_login_log.xlsx";
         List<IpRegionData> list = EasyExcel.read(fileName).head(IpRegionData.class).sheet().doReadSync();
         for (IpRegionData data : list) {
             String address = IPUtils.getAddress(data.getUserIp());
@@ -30,13 +30,13 @@ public class IpLocationQueryApplication {
             } else {
                 data.setUserIpRegion("归属地为空");
             }
-            log.info("读取到数据:{}", JSONObject.toJSONString(data));
+            System.out.println("读取到数据:" +  JSONObject.toJSONString(data));
             Thread.sleep(500);
         }
         // List<IpRegionData> ipRegionDataList = list.stream().filter(f -> ObjectUtil.equal(f.getUserIpRegion(), "归属地为空")).collect(Collectors.toList());
         ExcelWriter excelWriter = null;
         try {
-            excelWriter = EasyExcel.write("D:\\后台管理系统IP归属地4.xls", IpRegionData.class).build();
+            excelWriter = EasyExcel.write("D:\\ums_admin_login_log3.xlsx", IpRegionData.class).build();
             WriteSheet writeSheet = EasyExcel.writerSheet("sheet1").build();
             excelWriter.write(list, writeSheet);
         } finally {

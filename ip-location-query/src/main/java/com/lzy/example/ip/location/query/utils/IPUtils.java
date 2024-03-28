@@ -1,12 +1,9 @@
 package com.lzy.example.ip.location.query.utils;
 
+import cn.hutool.core.util.ObjUtil;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 /**
  * 解析ip地址工具类
@@ -17,24 +14,16 @@ public class IPUtils {
 
     public static String getAddress(String ip) {
         try {
-            URL realUrl = new URL(URL + ip + "&json=true");
-            HttpURLConnection conn = (HttpURLConnection) realUrl.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setUseCaches(false);
-            conn.setReadTimeout(3000);
-            conn.setConnectTimeout(3000);
-            conn.setInstanceFollowRedirects(false);
-            int code = conn.getResponseCode();
-            StringBuilder sb = new StringBuilder();
             String ipaddr = "";
-            if (code == 200) {
-                InputStream in = conn.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                ipaddr = sb.substring(sb.indexOf("addr") + 7, sb.indexOf("regionNames") - 3);
+            String httpRespStr = HttpUtils.doGet(URL + ip + "&json=true");
+            JSONObject httpRespJson = null;
+            try {
+                httpRespJson = JSONObject.parseObject(httpRespStr);
+            } catch (JSONException e) {
+                return ipaddr;
+            }
+            if (ObjUtil.isNotNull(httpRespJson)) {
+                ipaddr = httpRespJson.getString("addr");
             }
             return ipaddr;
         } catch (Exception e) {

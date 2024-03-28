@@ -18,7 +18,7 @@ import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
 
 /**
- * okhttp自动配置
+ * okhttp自动配置类
  *
  * @author Lizuoyang
  * @date 2024/03/28

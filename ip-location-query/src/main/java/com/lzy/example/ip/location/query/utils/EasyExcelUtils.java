@@ -9,11 +9,18 @@ import com.alibaba.excel.write.metadata.WriteSheet;
 import com.alibaba.fastjson.JSONObject;
 import com.lzy.example.ip.location.query.model.IpRegionData;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 /**
@@ -22,20 +29,32 @@ import java.util.stream.Collectors;
  * @date 2024/03/28
  */
 @Slf4j
+@Component
 public class EasyExcelUtils {
     public static final String READ_FILENAME = "ip-location-query\\doc\\ip.xlsx";
-    public static final String WRITE_FILENAME = "ip-location-query\\doc\\ip_mapper.xlsx";
+    public static final String WRITE_FILENAME = "ip-location-query\\doc\\ipRegionResult.xlsx";
 
-    public static List<IpRegionData> read() {
+    @Autowired
+    @Qualifier("taskExecutor")
+    private ThreadPoolTaskExecutor taskExecutor;
+
+    public  List<IpRegionData> read(String filePath) {
+        if ("demo".equals(filePath)) {
+            filePath = READ_FILENAME;
+        }
+        File readFile = new File(filePath);
+        if (!readFile.exists()) {
+            throw new RuntimeException("文件不存在！");
+        }
         // 读取excel获取所有条数
-        List<IpRegionData> alldatList = EasyExcel.read(READ_FILENAME).head(IpRegionData.class).sheet().doReadSync();
+        List<IpRegionData> alldatList = EasyExcel.read(readFile).head(IpRegionData.class).sheet().doReadSync();
         List<IpRegionData> convertDataList = convertIpRegion(alldatList);
         // 筛选归属地为空
         recursion(convertDataList);
         return convertDataList;
     }
 
-    public static List<IpRegionData> recursion(List<IpRegionData> alldatList) {
+    public List<IpRegionData> recursion(List<IpRegionData> alldatList) {
         List<IpRegionData> ipRegionIsNullList = alldatList.stream().filter(f -> ObjectUtil.equal(f.getUserIpRegion(), "归属地为空")).collect(Collectors.toList());
         if (CollectionUtil.isNotEmpty(ipRegionIsNullList)) {
             // 转换成HashSet后删除性能更好
@@ -50,13 +69,19 @@ public class EasyExcelUtils {
         return alldatList;
     }
 
-    public static List<IpRegionData> convertIpRegion(List<IpRegionData> params) {
+    public List<IpRegionData> convertIpRegion(List<IpRegionData> params) {
         List<IpRegionData> list = params.stream().limit(100).peek(data -> {
-            String address = IPUtils.getAddress(data.getUserIp());
-            if (StrUtil.isNotBlank(address)) {
-                data.setUserIpRegion(address);
-            } else {
-                data.setUserIpRegion("归属地为空");
+            Future<String> submit = taskExecutor.submit(() -> IPUtils.getAddress(data.getUserIp()));
+            try {
+                if (StrUtil.isNotBlank(submit.get())) {
+                    data.setUserIpRegion(submit.get());
+                } else {
+                    data.setUserIpRegion("归属地为空");
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
             }
             System.out.println("读取到数据:" + JSONObject.toJSONString(data));
             log.info("读取到数据:" + JSONObject.toJSONString(data));
@@ -64,9 +89,16 @@ public class EasyExcelUtils {
         return list;
     }
 
-    public static void write(List<IpRegionData> list) {
+    public void write(List<IpRegionData> list, String filePath) {
+        if ("demo".equals(filePath)) {
+            filePath = WRITE_FILENAME;
+        } else {
+            File readFile = new File(filePath);
+            List<String> fileNames = StrUtil.split(readFile.getName(), ".");
+            filePath = filePath.replace(readFile.getName(),  fileNames.get(0) + LocalDateTimeUtilX.formatYMDHSM(LocalDateTime.now()) + "." + fileNames.get(1));
+        }
         ExcelWriter excelWriter = null;
-        File writeFile = new File(WRITE_FILENAME);
+        File writeFile = new File(filePath);
         if(!writeFile.exists())
         {
             try {
@@ -85,6 +117,7 @@ public class EasyExcelUtils {
                 excelWriter.finish();
             }
         }
-    }
+        System.out.println("ip归属地解析完成，文件生成在：" + filePath);
 
+    }
 }

@@ -7,3 +7,16 @@ ok:
     max-idle-connections: 200
     # 连接空闲时间最多为 300 秒
     keep-alive-duration: 300
+
+thread:
+  pool:
+    # 核心线程数（默认线程数）
+    core-pool-size: 10
+    # 最大线程数
+    max-pool-size: 100
+    # 允许线程空闲时间（单位：默认为秒）
+    keep-alive-time: 10
+    # 缓冲队列数
+    queue-capacity: 200
+    # 线程池名前缀
+    thread-name-prefix: "Async-Service-"

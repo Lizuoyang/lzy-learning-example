@@ -5,12 +5,12 @@ import lombok.Data;
 
 @Data
 public class IpRegionData {
-    @ExcelProperty(value = "账号")
+    @ExcelProperty(value = "用户id")
+    private String userId;
+    @ExcelProperty(value = "用户名称")
     private String userName;
-    @ExcelProperty(value = "IP")
+    @ExcelProperty(value = "用户ip")
     private String userIp;
     @ExcelProperty(value = "用户归属地")
     private String userIpRegion;
-    @ExcelProperty(value = "时间")
-    private String userDate;
 }

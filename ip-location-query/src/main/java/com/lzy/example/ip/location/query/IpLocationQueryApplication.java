@@ -1,12 +1,7 @@
 package com.lzy.example.ip.location.query;
 
-import cn.hutool.core.util.StrUtil;
-import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.ExcelWriter;
-import com.alibaba.excel.write.metadata.WriteSheet;
-import com.alibaba.fastjson.JSONObject;
 import com.lzy.example.ip.location.query.model.IpRegionData;
-import com.lzy.example.ip.location.query.utils.IPUtils;
+import com.lzy.example.ip.location.query.utils.EasyExcelUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -21,32 +16,9 @@ public class IpLocationQueryApplication {
     public static void main(String[] args) throws InterruptedException {
         System.out.println("IpLocationQueryApplication Start ");
 
-        String fileName = "D:\\ums_admin_login_log.xlsx";
-        List<IpRegionData> list = EasyExcel.read(fileName).head(IpRegionData.class).sheet().doReadSync();
-        for (IpRegionData data : list) {
-            String address = IPUtils.getAddress(data.getUserIp());
-            if (StrUtil.isNotBlank(address)) {
-                data.setUserIpRegion(address);
-            } else {
-                data.setUserIpRegion("归属地为空");
-            }
-            System.out.println("读取到数据:" +  JSONObject.toJSONString(data));
-            Thread.sleep(500);
-        }
-        // List<IpRegionData> ipRegionDataList = list.stream().filter(f -> ObjectUtil.equal(f.getUserIpRegion(), "归属地为空")).collect(Collectors.toList());
-        ExcelWriter excelWriter = null;
-        try {
-            excelWriter = EasyExcel.write("D:\\ums_admin_login_log3.xlsx", IpRegionData.class).build();
-            WriteSheet writeSheet = EasyExcel.writerSheet("sheet1").build();
-            excelWriter.write(list, writeSheet);
-        } finally {
-            // 千万别忘记finish 会帮忙关闭流
-            if (excelWriter != null) {
-                excelWriter.finish();
-            }
-        }
+        List<IpRegionData> list = EasyExcelUtils.read();
 
-        /*String address = IPUtils.getAddress("60.255.166.116\n".replaceAll("\\n","").trim());
-        System.out.println("=== (在线)访问者的地址为："+address+" === ");*/
+        EasyExcelUtils.write(list);
+
     }
 }

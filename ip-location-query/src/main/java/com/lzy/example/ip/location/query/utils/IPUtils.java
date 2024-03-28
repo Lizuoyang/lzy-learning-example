@@ -9,7 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * IP地址
+ * 解析ip地址工具类
  */
 @Slf4j
 public class IPUtils {
@@ -34,9 +34,6 @@ public class IPUtils {
                 while ((line = reader.readLine()) != null) {
                     sb.append(line);
                 }
-                //if(window.IPCallBack)
-                //{IPCallBack({"ip":"117.153.202.54","pro":"湖北省","proCode":"420000","city":"恩施州","cityCode":"422800","region":"","regionCode":"0",
-                //"addr":"湖北省恩施州 移通","regionNames":"","err":""});}
                 ipaddr = sb.substring(sb.indexOf("addr") + 7, sb.indexOf("regionNames") - 3);
             }
             return ipaddr;

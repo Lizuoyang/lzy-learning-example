@@ -37,6 +37,9 @@ public class EasyExcelUtils {
     @Qualifier("taskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
 
+    @Autowired
+    private IPRegionUtils ipRegionUtils;
+
     public  List<IpRegionData> read(String filePath) {
         if ("demo".equals(filePath)) {
             filePath = READ_FILENAME;
@@ -70,7 +73,7 @@ public class EasyExcelUtils {
 
     public List<IpRegionData> convertIpRegion(List<IpRegionData> params) {
         List<Future<IpRegionData>> futuresList = params.stream().limit(100).map(data -> {
-            Future<IpRegionData> future = taskExecutor.submit(() -> IPUtils.getAddress(data));
+            Future<IpRegionData> future = taskExecutor.submit(() -> ipRegionUtils.getAddress(1, data));
             return  future;
         }).collect(Collectors.toList());
 

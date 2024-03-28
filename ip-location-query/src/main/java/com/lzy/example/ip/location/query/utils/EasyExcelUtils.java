@@ -72,11 +72,11 @@ public class EasyExcelUtils {
     }
 
     public List<IpRegionData> convertIpRegion(List<IpRegionData> params) {
-        List<Future<IpRegionData>> futuresList = params.stream().limit(100).map(data -> {
-            Future<IpRegionData> future = taskExecutor.submit(() -> ipRegionUtils.getAddress(1, data));
+        List<Future<IpRegionData>> futuresList = params.stream().limit(100000).map(data -> {
+            Future<IpRegionData> future = taskExecutor.submit(() -> ipRegionUtils.getAddress(2, data));
             return  future;
         }).collect(Collectors.toList());
-
+        System.out.println("ip归属地解析总条数: "+  futuresList.size());
         List<IpRegionData> list = futuresList.stream().map(future -> {
             IpRegionData result = new IpRegionData();
             try {

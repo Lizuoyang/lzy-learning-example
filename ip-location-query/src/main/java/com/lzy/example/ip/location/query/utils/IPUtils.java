@@ -21,8 +21,8 @@ public class IPUtils {
             HttpURLConnection conn = (HttpURLConnection) realUrl.openConnection();
             conn.setRequestMethod("GET");
             conn.setUseCaches(false);
-            conn.setReadTimeout(6000);
-            conn.setConnectTimeout(6000);
+            conn.setReadTimeout(3000);
+            conn.setConnectTimeout(3000);
             conn.setInstanceFollowRedirects(false);
             int code = conn.getResponseCode();
             StringBuilder sb = new StringBuilder();

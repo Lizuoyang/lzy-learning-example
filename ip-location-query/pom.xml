@@ -11,7 +11,8 @@
 
     <groupId>com.lzy.example</groupId>
     <artifactId>ip-location-query</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${revision}</version>
+    <packaging>jar</packaging>
     <name>${project.artifactId}</name>
     <description>ip归属地查询：解析excel文件中的ip，查询出归属地后生成新的excel文件。</description>
 
@@ -25,6 +26,10 @@
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>1.2.83</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
     </dependencies>
 

@@ -3,6 +3,7 @@ package com.lzy.example.ip.location.query.utils;
 import cn.hutool.core.util.ObjUtil;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import com.lzy.example.ip.location.query.model.IpRegionData;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -12,20 +13,22 @@ import lombok.extern.slf4j.Slf4j;
 public class IPUtils {
     private static final String URL = "http://whois.pconline.com.cn/ipJson.jsp?ip=";
 
-    public static String getAddress(String ip) {
+    public static IpRegionData getAddress(IpRegionData data) {
         try {
-            String ipaddr = "";
-            String httpRespStr = HttpUtils.doGet(URL + ip + "&json=true");
+            String httpRespStr = HttpUtils.doGet(URL + data.getUserIp() + "&json=true");
             JSONObject httpRespJson = null;
             try {
                 httpRespJson = JSONObject.parseObject(httpRespStr);
             } catch (JSONException e) {
-                return ipaddr;
+                data.setUserIpRegion("归属地为空");
+                return data;
             }
             if (ObjUtil.isNotNull(httpRespJson)) {
-                ipaddr = httpRespJson.getString("addr");
+                data.setUserIpRegion(httpRespJson.getString("addr"));
+            } else {
+                data.setUserIpRegion("归属地为空");
             }
-            return ipaddr;
+            return data;
         } catch (Exception e) {
             e.printStackTrace();
             return null;

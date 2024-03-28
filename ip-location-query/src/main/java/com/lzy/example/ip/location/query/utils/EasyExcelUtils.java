@@ -6,7 +6,6 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
-import com.alibaba.fastjson.JSONObject;
 import com.lzy.example.ip.location.query.model.IpRegionData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,21 +69,21 @@ public class EasyExcelUtils {
     }
 
     public List<IpRegionData> convertIpRegion(List<IpRegionData> params) {
-        List<IpRegionData> list = params.stream().limit(100).peek(data -> {
-            Future<String> submit = taskExecutor.submit(() -> IPUtils.getAddress(data.getUserIp()));
+        List<Future<IpRegionData>> futuresList = params.stream().limit(100).map(data -> {
+            Future<IpRegionData> future = taskExecutor.submit(() -> IPUtils.getAddress(data));
+            return  future;
+        }).collect(Collectors.toList());
+
+        List<IpRegionData> list = futuresList.stream().map(future -> {
+            IpRegionData result = new IpRegionData();
             try {
-                if (StrUtil.isNotBlank(submit.get())) {
-                    data.setUserIpRegion(submit.get());
-                } else {
-                    data.setUserIpRegion("归属地为空");
-                }
+                result =  future.get();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
                 e.printStackTrace();
             }
-            System.out.println("读取到数据:" + JSONObject.toJSONString(data));
-            log.info("读取到数据:" + JSONObject.toJSONString(data));
+            return result;
         }).collect(Collectors.toList());
         return list;
     }

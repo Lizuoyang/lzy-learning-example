@@ -11,12 +11,12 @@ ok:
 thread:
   pool:
     # 核心线程数（默认线程数）
-    core-pool-size: 10
+    core-pool-size: 100
     # 最大线程数
-    max-pool-size: 100
+    max-pool-size: 200
     # 允许线程空闲时间（单位：默认为秒）
     keep-alive-time: 10
     # 缓冲队列数
-    queue-capacity: 200
+    queue-capacity: 500
     # 线程池名前缀
     thread-name-prefix: "Async-Service-"

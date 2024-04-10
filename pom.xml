@@ -17,6 +17,7 @@
         <module>ip-location-query</module>
         <module>elastic-serach-demo</module>
         <module>distributed-transaction-rocketMQ</module>
+        <module>mqtt-demo</module>
     </modules>
 
     <!-- 继承：Spring Boot Parent -->

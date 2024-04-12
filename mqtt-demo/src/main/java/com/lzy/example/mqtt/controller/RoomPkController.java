@@ -2,6 +2,7 @@ package com.lzy.example.mqtt.controller;
 
 import com.lzy.example.mqtt.domain.ResponseResult;
 import com.lzy.example.mqtt.domain.request.CreatePkRequest;
+import com.lzy.example.mqtt.domain.request.SendGiftRequest;
 import com.lzy.example.mqtt.service.RoomPkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +24,12 @@ public class RoomPkController {
     @PostMapping("/start")
     public ResponseResult startPk(@RequestBody CreatePkRequest params) {
         roomPkService.createPk(params);
+        return ResponseResult.success();
+    }
+
+    @PostMapping("/send")
+    public ResponseResult sendGift(@RequestBody SendGiftRequest params) {
+        roomPkService.sendMsg(params);
         return ResponseResult.success();
     }
 }

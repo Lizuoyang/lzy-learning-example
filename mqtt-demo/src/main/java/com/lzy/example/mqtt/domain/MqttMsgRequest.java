@@ -10,9 +10,9 @@ import lombok.Data;
 @Data
 public class MqttMsgRequest {
     /**
-     * 名称
+     * 用户id
      */
-    private String name = "";
+    private String userId = "";
     /**
      * 内容
      */

@@ -1,6 +1,9 @@
 package com.lzy.example.mqtt.service.impl;
 
+import cn.hutool.core.util.ObjUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.lzy.example.mqtt.domain.request.CreatePkRequest;
+import com.lzy.example.mqtt.domain.request.SendGiftRequest;
 import com.lzy.example.mqtt.domain.response.UserInfoResponse;
 import com.lzy.example.mqtt.mqtt.MyMQTTClient;
 import com.lzy.example.mqtt.service.RedisService;
@@ -11,10 +14,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.*;
 
+/**
+ * @author Lizuoyang
+ * @date 2024/04/12
+ */
 @Service
 @Slf4j
 public class RoomPkServiceImpl implements RoomPkService {
-    private static final String TOPIC = "pk/room:";
+    private static final String TOPIC = "pk/room";
     private static final DelayQueue<DelayedTask> delayedQueue = new DelayQueue<>();
 
     /**
@@ -30,21 +37,33 @@ public class RoomPkServiceImpl implements RoomPkService {
     private RedisService redisService;
 
     @Override
-    public void createPk(CreatePkRequest request) {
+    public String createPk(CreatePkRequest request) {
         // 订阅主题
         request.getRedUserIds().forEach(item -> createTopicAndSubscribe(item, request.getRoomId(), "red"));
         request.getBlueUserIds().forEach(item -> createTopicAndSubscribe(item, request.getRoomId(), "blue"));
         // 创建调度器，延迟推送pk结果
         createDelayQueue(request);
+        return TOPIC;
+    }
+
+    @Override
+    public void sendMsg(SendGiftRequest request) {
+        UserInfoResponse userInfoResponse = (UserInfoResponse)redisService.hGet(TOPIC + ":" + request.getRoomId() + ":" + request.getTeamName(), request.getUserId());
+        if (ObjUtil.isNull(userInfoResponse)) {
+            throw new RuntimeException("用户异常");
+        }
+        userInfoResponse.setPointNum(userInfoResponse.getPointNum() + request.getGiftNum());
+        log.info("用户：{}, 刷了礼物：{}， 数量：{}", request.getUserId(), request.getGiftId(), request.getGiftNum());
+        myMQTTClient.publish(JSONObject.toJSONString(userInfoResponse), TOPIC, 1);
+        redisService.hSet(TOPIC + ":" + request.getRoomId() + ":" + request.getTeamName() ,request.getUserId(), userInfoResponse);
     }
 
     private void createTopicAndSubscribe(String userId, String roomId, String teamName) {
-        String topicName = TOPIC + roomId;
         UserInfoResponse userInfoResponse = new UserInfoResponse();
         userInfoResponse.setUserId(userId);
         userInfoResponse.setPointNum(0);
-        redisService.hSet(topicName + ":" + teamName ,userId, userInfoResponse);
-        myMQTTClient.subscribe(topicName,1);
+        redisService.hSet(TOPIC + ":" + roomId + ":" + teamName ,userId, userInfoResponse);
+        myMQTTClient.subscribe(TOPIC,1);
     }
 
     private static void createDelayQueue(CreatePkRequest request) {

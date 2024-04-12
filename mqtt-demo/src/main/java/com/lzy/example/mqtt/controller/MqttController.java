@@ -3,7 +3,7 @@ package com.lzy.example.mqtt.controller;
 import com.lzy.example.mqtt.domain.MqttMsgRequest;
 import com.lzy.example.mqtt.domain.ResponseResult;
 import com.lzy.example.mqtt.mqtt.MyMQTTClient;
-import com.lzy.example.mqtt.utils.RedisUtil;
+import com.lzy.example.mqtt.service.RedisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +23,7 @@ public class MqttController {
      * redis
      */
     @Autowired
-    private RedisUtil redisUtil;
+    private RedisService redisService;
     /**
      * 创建主题
      * @param topicName
@@ -32,7 +32,7 @@ public class MqttController {
     @PostMapping("/createTopic")
     public ResponseResult createTopic(String user,String topicName){
         //直接将主题放在缓存中，用的时候从缓存中取出来
-        redisUtil.set(user,topicName);
+        redisService.set(user,topicName);
         return ResponseResult.success("创建成功，主题为："+topicName);
     }
     /**
@@ -42,7 +42,7 @@ public class MqttController {
      */
     @PostMapping("/getTopic")
     public ResponseResult getTopic(String user){
-        String topicName = redisUtil.get(user).toString();
+        String topicName = redisService.get(user).toString();
         return ResponseResult.success(topicName);
     }
     /**
@@ -50,7 +50,7 @@ public class MqttController {
      */
     @PostMapping("/subscribeTopic")
     public ResponseResult subscribeTopic(String user){
-        String topicName = redisUtil.get(user).toString();
+        String topicName = redisService.get(user).toString();
         myMQTTClient.subscribe(topicName,1);
         return ResponseResult.success("订阅"+topicName+"主题成功");
     }
@@ -59,7 +59,7 @@ public class MqttController {
      */
     @PostMapping("/cleanSubscribeTopic")
     public ResponseResult cleanSubscribeTopic(String user){
-        String topicName = redisUtil.get(user).toString();
+        String topicName = redisService.get(user).toString();
         myMQTTClient.cleanTopic(topicName);
         return ResponseResult.success("取消订阅"+topicName+"主题成功");
     }

@@ -1,0 +1,12 @@
+## MQTT配置
+mqtt:
+  host: tcp://127.0.0.1:1883
+  userName: admin
+  passWord: qwe22515
+  qos: 1
+  clientId: serve
+  timeout: 10
+  keepalive: 20
+
+server:
+  port: 8092

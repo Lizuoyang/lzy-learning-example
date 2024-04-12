@@ -1,0 +1,41 @@
+// 服务端发送消息
+POST http://localhost:8092/mqtt/sendMsg
+Content-Type: application/json
+
+{
+  "name": "lizuoyang",
+  "content": "李佐洋送了一个火箭",
+  "topicName": "pkroom2",
+  "qos":2
+}
+
+###
+// 客户端订阅主题
+POST http://localhost:8093/mqtt/subscribeTopic?user=1
+Content-Type: application/json
+
+{}
+
+###
+
+// 服务端订阅主题
+POST http://localhost:8092/mqtt/subscribeTopic?user=1
+Content-Type: application/json
+
+{}
+
+###
+// 服务端创建主题
+POST localhost:8092/mqtt/createTopic?user=2&topicName=pkroom2
+Content-Type: application/json
+
+{}
+
+###
+// 根据用户获取主题
+POST http://localhost:8092/mqtt/getTopic?user=2
+Content-Type: application/json
+
+{}
+
+###

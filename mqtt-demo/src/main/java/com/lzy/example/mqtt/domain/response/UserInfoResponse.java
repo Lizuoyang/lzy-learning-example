@@ -17,4 +17,8 @@ public class UserInfoResponse {
      * 赠送礼物积分
      */
     private Integer pointNum;
+    /**
+     * 所属队伍
+     */
+    private String teamName;
 }

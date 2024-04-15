@@ -1,3 +1,3 @@
 spring:
   profiles:
-    active: client
+    active: serve

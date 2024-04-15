@@ -16,19 +16,11 @@ public class CreatePkRequest {
      */
     private String roomId;
     /**
-     * 参与pk的红队用户id
+     * 参与pk用户id
      */
-    private List<String> redUserIds;
-    /**
-     * 参与pk的蓝队用户id
-     */
-    private List<String> blueUserIds;
+    private List<String> userIds;
     /**
      * pk时长
      */
     private Integer pkTime;
-    /**
-     * 惩罚时长
-     */
-    private Integer pkPunishTime;
 }

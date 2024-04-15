@@ -23,13 +23,21 @@ public class RoomPkController {
 
     @PostMapping("/start")
     public ResponseResult startPk(@RequestBody CreatePkRequest params) {
-        roomPkService.createPk(params);
+        try {
+            roomPkService.createPk(params);
+        } catch (Exception e) {
+            return ResponseResult.error(e.getMessage());
+        }
         return ResponseResult.success();
     }
 
     @PostMapping("/send")
     public ResponseResult sendGift(@RequestBody SendGiftRequest params) {
-        roomPkService.sendMsg(params);
+        try {
+            roomPkService.sendMsg(params);
+        } catch (Exception e) {
+            return ResponseResult.error(e.getMessage());
+        }
         return ResponseResult.success();
     }
 }

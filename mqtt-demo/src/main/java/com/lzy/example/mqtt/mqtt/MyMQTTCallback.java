@@ -1,5 +1,6 @@
 package com.lzy.example.mqtt.mqtt;
 
+import com.lzy.example.mqtt.service.impl.RoomPkServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
@@ -82,6 +83,13 @@ public class MyMQTTCallback implements MqttCallbackExtended {
     public  void  connectComplete(boolean reconnect,String serverURI){
         log.info("MQTT 连接成功，连接方式：{}",reconnect?"重连":"直连");
         //订阅主题(可以在这里订阅主题)
+        if (MyMQTTClient.getClient().isConnected()) {
+            myMQTTClient.subscribe(RoomPkServiceImpl.PK_CREATE_TOPIC, 1);
+            System.out.println("mqtt连接成功，客户端ID：" + MyMQTTClient.getClient().getClientId());
+            System.out.println("--订阅主题:：" + RoomPkServiceImpl.PK_CREATE_TOPIC);
+        } else {
+            System.out.println("mqtt连接失败，客户端ID：" + MyMQTTClient.getClient().getClientId());
+        }
     }
     /**
      * * 消息到达后
@@ -94,5 +102,6 @@ public class MyMQTTCallback implements MqttCallbackExtended {
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
         System.out.println("接收到已经发布的 QoS 1 或 QoS 2 消息的传递令牌时调用");
         log.info("==========deliveryComplete={}==========", iMqttDeliveryToken.isComplete());
+
     }
 }

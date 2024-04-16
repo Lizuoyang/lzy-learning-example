@@ -8,6 +8,7 @@ import com.lzy.example.mqtt.domain.ResponseResult;
 import com.lzy.example.mqtt.domain.enums.TeamNameEnum;
 import com.lzy.example.mqtt.domain.request.CreatePkRequest;
 import com.lzy.example.mqtt.domain.request.SendGiftRequest;
+import com.lzy.example.mqtt.domain.response.PkRecordResponse;
 import com.lzy.example.mqtt.domain.response.UserInfoResponse;
 import com.lzy.example.mqtt.mqtt.MyMQTTClient;
 import com.lzy.example.mqtt.service.RedisService;
@@ -16,11 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -33,7 +32,7 @@ public class RoomPkServiceImpl implements RoomPkService {
     public static final String PK_CREATE_TOPIC = "pk/inRoom";
     public static final Integer PK_JOIN_NUMBER = 2;
     public static final DelayQueue<DelayedTask> delayedQueue = new DelayQueue<>();
-
+    private static Integer spiritFlag = 0;
     /**
      * 客户端
      */
@@ -55,12 +54,17 @@ public class RoomPkServiceImpl implements RoomPkService {
         if (request.getUserIds().size() % PK_JOIN_NUMBER > 0) {
             throw new RuntimeException("参与人数必须是双数！");
         }
-        List<List<String>> partition = ListUtil.partition(request.getUserIds(), request.getUserIds().size() / PK_JOIN_NUMBER);
+//        List<List<String>> partition = ListUtil.partition(request.getUserIds(), request.getUserIds().size() / PK_JOIN_NUMBER);
+        List<List<String>> partition = userIdListPartition(request.getUserIds());
         // 订阅主题
         partition.get(0).forEach(item -> createTeam(item, request.getRoomId(), TeamNameEnum.RED.getCode()));
         partition.get(1).forEach(item -> createTeam(item, request.getRoomId(), TeamNameEnum.BLUE.getCode()));
-        // 创建调度器，延迟推送pk结果
+        // 开启向客户端推送pk数据
+        spiritFlag = 0;
+        // 创建延迟队列，延迟推送pk结果
         createDelayQueue(request);
+        // 创建定时任务，每秒推送pk数据
+        createScheduler(request);
         return PK_CREATE_TOPIC;
     }
 
@@ -76,12 +80,61 @@ public class RoomPkServiceImpl implements RoomPkService {
         redisService.hSet(PK_CREATE_TOPIC + ":" + request.getRoomId() ,request.getUserId(), userInfoResponse);
     }
 
+    private List<List<String>> userIdListPartition(List<String> userIds) {
+        AtomicInteger teamFlag = new AtomicInteger();
+        AtomicInteger addCount = new AtomicInteger();
+        List<List<String>> partition = new ArrayList<>();
+        if (userIds.size() == 2) {
+            partition = ListUtil.partition(userIds, 1);
+        } else {
+            List<String> redTeam = new ArrayList<>();
+            List<String> blueTeam = new ArrayList<>();
+            userIds.forEach(item -> {
+                if (teamFlag.get() == 0) {
+                    redTeam.add(item);
+                    if (addCount.getAndIncrement() == 1) {
+                        teamFlag.set(1);
+                        addCount.set(0);
+                    }
+                } else {
+                    blueTeam.add(item);
+                    if (addCount.getAndIncrement() == 1) {
+                        teamFlag.set(0);
+                        addCount.set(0);
+                    }
+                }
+            });
+            partition.add(redTeam);
+            partition.add(blueTeam);
+        }
+
+        return partition;
+    }
+
     private void createTeam(String userId, String roomId, String teamName) {
         UserInfoResponse userInfoResponse = new UserInfoResponse();
         userInfoResponse.setUserId(userId);
         userInfoResponse.setPointNum(0);
         userInfoResponse.setTeamName(teamName);
         redisService.hSet(PK_CREATE_TOPIC + ":" + roomId ,userId, userInfoResponse);
+    }
+
+    private void createScheduler(CreatePkRequest request) {
+        ScheduledExecutorService spiritScheduler = Executors.newSingleThreadScheduledExecutor();
+        spiritScheduler.scheduleAtFixedRate(() -> {
+            if (spiritFlag == 0) {
+                PkRecordResponse pkRecordResponse = new PkRecordResponse();
+                Map<Object, Object> maps = redisService.hGetAll(PK_CREATE_TOPIC + ":" + request.getRoomId());
+                List<UserInfoResponse> list = maps.values().stream().map(item -> (UserInfoResponse) item).collect(Collectors.toList());
+                Map<String, Integer> sumPointNumsMap = sumPointNums(request.getRoomId());
+                pkRecordResponse.setBlueTeamScore(sumPointNumsMap.get(TeamNameEnum.BLUE.getCode()));
+                pkRecordResponse.setRedTeamScore(sumPointNumsMap.get(TeamNameEnum.RED.getCode()));
+                pkRecordResponse.setUserList(list);
+                // 发送消息到客户端
+                myMQTTClient.publish(JSONObject.toJSONString(ResponseResult.success(2002, "房间pk明细", pkRecordResponse)), PK_CREATE_TOPIC, 1);
+            }
+
+        }, 0, 1, TimeUnit.SECONDS); // 从现在开始，每两秒执行一次任务
     }
 
     private void createDelayQueue(CreatePkRequest request) {
@@ -104,8 +157,10 @@ public class RoomPkServiceImpl implements RoomPkService {
                 pkResult.put("roomId", request.getRoomId());
                 // 小于0：蓝队胜利，等于0：平局，大于0：红队胜利，
                 pkResult.put("pkResult", list.get(0).getValue() - list.get(1).getValue());
+                // 关闭向客户端推送pk数据
+                spiritFlag = 1;
                 // 向订阅的客户端发送pk结果
-                myMQTTClient.publish(JSONObject.toJSONString(ResponseResult.success(2002,"pk结果（小于0：蓝队胜利，等于0：平局，大于0：红队胜利）",pkResult)), PK_CREATE_TOPIC, 1);
+                myMQTTClient.publish(JSONObject.toJSONString(ResponseResult.success(2003,"pk结果（小于0：蓝队胜利，等于0：平局，大于0：红队胜利）",pkResult)), PK_CREATE_TOPIC, 1);
             }
         }, 0, 1, TimeUnit.SECONDS);
     }

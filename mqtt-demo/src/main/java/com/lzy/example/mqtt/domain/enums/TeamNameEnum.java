@@ -11,8 +11,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum TeamNameEnum {
+    RED("红队", "red"),
     BLUE("蓝队", "blue"),
-    RED("红队", "red")
     ;
 
     private String name;

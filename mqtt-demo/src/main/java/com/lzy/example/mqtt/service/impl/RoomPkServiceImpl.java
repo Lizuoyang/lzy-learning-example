@@ -129,7 +129,10 @@ public class RoomPkServiceImpl implements RoomPkService {
                 Map<String, Integer> sumPointNumsMap = sumPointNums(request.getRoomId());
                 pkRecordResponse.setBlueTeamScore(sumPointNumsMap.get(TeamNameEnum.BLUE.getCode()));
                 pkRecordResponse.setRedTeamScore(sumPointNumsMap.get(TeamNameEnum.RED.getCode()));
-                pkRecordResponse.setUserList(list);
+
+                Map<String, List<UserInfoResponse>> groupUserMaps = list.stream().collect(Collectors.groupingBy(UserInfoResponse::getTeamName));
+                pkRecordResponse.setBlueUserList(groupUserMaps.get(TeamNameEnum.BLUE.getCode()));
+                pkRecordResponse.setRedUserList(groupUserMaps.get(TeamNameEnum.RED.getCode()));
                 // 发送消息到客户端
                 myMQTTClient.publish(JSONObject.toJSONString(ResponseResult.success(2002, "房间pk明细", pkRecordResponse)), PK_CREATE_TOPIC, 1);
             }

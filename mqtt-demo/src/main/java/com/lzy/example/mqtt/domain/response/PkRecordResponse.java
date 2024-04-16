@@ -11,7 +11,20 @@ import java.util.List;
  */
 @Data
 public class PkRecordResponse {
+    /**
+     * 蓝队总贡献
+     */
     private Integer blueTeamScore;
+    /**
+     * 红队总贡献
+     */
     private Integer redTeamScore;
-    private List<UserInfoResponse> userList;
+    /**
+     * 蓝队贡献排行榜
+     */
+    private List<UserInfoResponse> blueUserList;
+    /**
+     * 红队贡献排行榜
+     */
+    private List<UserInfoResponse> redUserList;
 }

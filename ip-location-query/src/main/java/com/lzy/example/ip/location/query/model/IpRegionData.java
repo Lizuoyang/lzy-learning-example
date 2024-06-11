@@ -11,6 +11,8 @@ public class IpRegionData {
     private String userName;
     @ExcelProperty(value = "用户ip")
     private String userIp;
+    @ExcelProperty(value = "日期")
+    private String createTime;
     @ExcelProperty(value = "用户归属地")
     private String userIpRegion;
 }

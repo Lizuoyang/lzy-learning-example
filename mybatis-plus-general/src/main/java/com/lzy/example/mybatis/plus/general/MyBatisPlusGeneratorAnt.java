@@ -158,10 +158,10 @@ public class MyBatisPlusGeneratorAnt {
         // 配置自定义输出模板
         //指定自定义模板路径，注意不要带上.ftl/.vm, 会根据使用的模板引擎自动识别
         templateConfig.setEntity("templates/entity.java");
-//        templateConfig.setService("templates/service.java");
-//        templateConfig.setServiceImpl("templates/serviceImpl.java");
-//        templateConfig.setMapper("templates/mapper.java");
-//        templateConfig.setController("templates/controller.java");
+        templateConfig.setService("templates/service.java");
+        templateConfig.setServiceImpl("templates/serviceImpl.java");
+        templateConfig.setMapper("templates/mapper.java");
+        templateConfig.setController("templates/controller.java");
 
         templateConfig.setXml(null);
         mpg.setTemplate(templateConfig);

@@ -158,8 +158,10 @@ public class MyBatisPlusGeneratorAnt {
         // 配置自定义输出模板
         //指定自定义模板路径，注意不要带上.ftl/.vm, 会根据使用的模板引擎自动识别
         templateConfig.setEntity("templates/entity.java");
-        // templateConfig.setService();
-        // templateConfig.setController();
+//        templateConfig.setService("templates/service.java");
+//        templateConfig.setServiceImpl("templates/serviceImpl.java");
+//        templateConfig.setMapper("templates/mapper.java");
+//        templateConfig.setController("templates/controller.java");
 
         templateConfig.setXml(null);
         mpg.setTemplate(templateConfig);
@@ -168,7 +170,7 @@ public class MyBatisPlusGeneratorAnt {
         StrategyConfig strategy = new StrategyConfig();
         strategy.setNaming(NamingStrategy.underline_to_camel);
         strategy.setColumnNaming(NamingStrategy.underline_to_camel);
-//        strategy.setSuperEntityClass("你自己的父类实体,没有就不用设置!");
+        strategy.setSuperEntityClass("com.lzy.example.mybatis.plus.general.model.BasicModel");
         strategy.setEntityLombokModel(true);
         strategy.setRestControllerStyle(true);
         // 公共父类
